@@ -1,0 +1,35 @@
+{
+  "name": "pearboard",
+  "main": "index.html",
+  "pear": {
+    "name": "pearboard",
+    "type": "desktop",
+    "gui": {
+      "backgroundColor": "#000",
+      "height": "450",
+      "width": "600",
+      "resizable": false,
+      "name": "PearBoard",
+      "links": [
+        "https://*"
+      ]
+    }
+  },
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "pear run -d .",
+    "test": "brittle test/*.test.js"
+  },
+  "devDependencies": {
+    "brittle": "^3.0.0",
+    "pear-interface": "^1.0.0"
+  },
+  "dependencies": {
+    "b4a": "^1.6.7",
+    "bare-events": "^2.6.1",
+    "hypercore": "^11.13.0",
+    "hypercore-crypto": "^3.6.1",
+    "hyperswarm": "^4.13.1"
+  }
+}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="./styles/main.css" />
+    <script type="module" src="./app.js"></script>
+    <script>
+      function showPage(pageId) {
+        // Hide all pages
+        const pages = document.querySelectorAll('.page')
+        pages.forEach((page) => {
+          page.classList.add('hidden')
+        })
+
+        // Show the selected page
+        const targetPage = document.getElementById(pageId)
+        if (targetPage) {
+          targetPage.classList.remove('hidden')
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="bar"><pear-ctrl></pear-ctrl></div>
+    <div class="header">
+      <h1>PearBoard</h1>
+    </div>
+    <div id="login-page" class="page">
+      <form action="" id="login-form">
+        <input type="text" id="connectionid" placeholder="Connection ID" />
+        <input type="password" id="password" placeholder="Password" />
+        <button id="login-button">Connect</button>
+      </form>
+      <div class="footer">
+        - or -
+        <button
+          id="to-create-connection-page"
+          onclick="showPage('create-connection-page')"
+        >
+          Create Connection
+        </button>
+      </div>
+    </div>
+    <div id="create-connection-page" class="page hidden">
+      <form action="" id="create-connection-form">
+        <input
+          type="text"
+          id="set-password"
+          placeholder="Set Password (optional)"
+        />
+        <button id="create-connection-button">Create Connection</button>
+      </form>
+      <div class="footer">
+        - or -
+        <button id="to-login-page" onclick="showPage('login-page')">
+          Connect To Existing Room
+        </button>
+      </div>
+    </div>
+    <div id="main-page" class="page hidden">
+      <div class="flex-col">
+        <p class="connected-devices">
+          <span id="peers-count">0</span> connected devices
+        </p>
+        <p class="connection-id">(<span id="connection-id"></span>)</p>
+      </div>
+      <div class="flex-col">
+        <p class="clipboard-text">Clipboard Content:</p>
+        <div id="devices-list"></div>
+        <form action="" id="clipboard-form">
+          <textarea
+            id="clipboard-content"
+            placeholder="Clipboard Content..."
+            style="resize: none"
+            readonly
+          ></textarea>
+        </form>
+        <div class="flex gap-2">
+          <button id="copy-button">Copy</button>
+          <button id="disconnect-button">Disconnect</button>
+        </div>
+        <button id="send-my-clipboard-content">Send My Clipboard</button>
+      </div>
+    </div>
+    <div id="loading" class="hidden">Loading...</div>
+  </body>
+</html>
