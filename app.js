@@ -98,5 +98,6 @@ async function sendClipboardContent(e) {
 function newClipboardContent(from, message) {
   console.log(from, message)
   //
-  // TODO: save to DHT so other peers can access it
+  // TODO: https://docs.pears.com/building-blocks/autobase
+  // TODO: save to autobase, read by user id and handle password for room connection
 }
