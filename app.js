@@ -3,15 +3,26 @@
 import Hyperswarm from 'hyperswarm' // Module for P2P networking and connecting peers
 import crypto from 'hypercore-crypto' // Cryptographic functions for generating the key in app
 import b4a from 'b4a' // Module for buffer-to-string and vice-versa conversions
+
+import Corestore from 'corestore'
+import Autobase from 'autobase'
+import Hyperbee from 'hyperbee'
+
+const store = new Corestore('./autobase-folder')
+
+const base = await initAutobase()
+
 const { teardown, updates } = Pear
 
 const swarm = new Hyperswarm()
 
 teardown(() => swarm.destroy())
 
-updates(() => Pear.reload())
+// updates(() => Pear.reload())
 
 swarm.on('connection', (peer) => {
+  peer.pipe(store.replicate(peer)).pipe(peer)
+
   const name = b4a.toString(peer.remotePublicKey, 'hex').substr(0, 6)
   const device = document.createElement('div')
   const deviceList = document.querySelector('#devices-list')
@@ -19,14 +30,21 @@ swarm.on('connection', (peer) => {
   const isFirstDevice = !deviceList.querySelector('.device')
 
   device.classList.add('device')
-  if (isFirstDevice) device.classList.add('active')
+  if (isFirstDevice) {
+    device.classList.add('active')
+    document.querySelector('#clipboard-form').classList.remove('hidden')
+  }
   device.textContent = name
   deviceList.appendChild(device)
 
-  device.addEventListener('click', () => {
+  device.addEventListener('click', async () => {
     const activeDevice = deviceList.querySelector('.active')
     if (activeDevice) activeDevice.classList.remove('active')
     device.classList.add('active')
+
+    // read
+    const clipboardContent = await read(base, name)
+    document.querySelector('#clipboard-content').value = clipboardContent
   })
 
   peer.on('data', (message) => newClipboardContent(name, message))
@@ -93,9 +111,43 @@ async function sendClipboardContent(e) {
   for (const peer of peers) peer.write(clipboardContent)
 }
 
-function newClipboardContent(from, message) {
-  console.log(from, message)
-  //
-  // TODO: https://docs.pears.com/building-blocks/autobase
-  // TODO: save to autobase, read by user id and handle password for room connection
+async function newClipboardContent(from, message) {
+  await write(base, from, message)
+}
+
+// autobase stuff
+
+function open(store) {
+  return new Hyperbee(store.get('kv-store'), {
+    keyEncoding: 'utf-8',
+    valueEncoding: 'json',
+  })
+}
+
+async function apply(nodes, view) {
+  for (const { value } of nodes) {
+    if (value.type === 'set' && value.key) {
+      await view.put(value.key, value.val)
+    } else if (value.type === 'del' && value.key) {
+      await view.del(value.key)
+    }
+  }
+}
+
+async function initAutobase(remoteKey = null) {
+  const base = new Autobase(store, remoteKey, { open, apply })
+  await base.ready()
+  return base
+}
+
+async function write(base, key, val) {
+  if (!key) throw new Error('Key is required')
+  await base.append({ type: 'set', key, val })
+  await base.update() // refresh
+}
+
+async function read(base, key) {
+  await base.update()
+  const result = await base.view.get(key)
+  return result ? result.value : null
 }
