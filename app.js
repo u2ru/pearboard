@@ -89,8 +89,6 @@ async function sendClipboardContent(e) {
   const clipboardContent = await navigator.clipboard.readText()
   e.preventDefault()
 
-  newClipboardContent('Me', clipboardContent)
-
   const peers = [...swarm.connections]
   for (const peer of peers) peer.write(clipboardContent)
 }
